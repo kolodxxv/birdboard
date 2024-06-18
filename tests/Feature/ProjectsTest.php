@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use App\Models\Project;
 
 class ProjectsTest extends TestCase
 {
@@ -27,5 +28,21 @@ class ProjectsTest extends TestCase
         $this->assertDatabaseHas('projects', $attributes);
 
         $this->get('/projects')->assertSee($attributes['title']);
+    }
+
+    #[Test]
+    public function a_project_requires_a_title()
+    {
+        $attributes = Project::factory()->raw(['title' => '' ]);
+
+        $this->post('/projects', $attributes)->assertSessionHasErrors('title');
+    }
+
+    #[Test]
+    public function a_project_requires_a_description()
+    {
+        $attributes = Project::factory()->raw(['description' => '' ]);
+
+        $this->post('/projects', $attributes)->assertSessionHasErrors('description');
     }
 }
