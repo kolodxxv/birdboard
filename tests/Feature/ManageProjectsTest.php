@@ -9,32 +9,21 @@ use PHPUnit\Framework\Attributes\Test;
 use App\Models\Project;
 use App\Models\User;
 
-class ProjectsTest extends TestCase
+class ManageProjectsTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
 
     #[Test]
-    public function guests_cannot_create_projects()
+    public function guests_cannot_manage_projects()
     {
 
-        $attributes = Project::factory()->raw();
-
-        $this->post('/projects', $attributes)->assertRedirect('login');
-    }
-
-    #[Test]
-    public function guests_cannot_view_projects()
-    {
-
-        $this->get('/projects')->assertRedirect('login');
-    }
-
-    #[Test]
-    public function guests_cannot_view_a_single_project()
-    {
         $project = Project::factory()->create();
 
+        $this->get('/projects')->assertRedirect('login');
+        $this->get('/projects/create')->assertRedirect('login');
+        $this->post('/projects', $project->toArray())->assertRedirect('login');
         $this->get($project->path())->assertRedirect('login');
+
     }
 
     #[Test]
@@ -44,6 +33,8 @@ class ProjectsTest extends TestCase
         
         $user = User::factory()->create();
         $this->actingAs($user);
+
+        $this->get('/projects/create')->assertStatus(200);
 
         $attributes = [
             'title' => $this->faker->sentence,
