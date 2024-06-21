@@ -7,15 +7,43 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use App\Models\Project;
+use App\Models\User;
 
 class ProjectsTest extends TestCase
 {
     use WithFaker, RefreshDatabase;
 
     #[Test]
+    public function guests_cannot_create_projects()
+    {
+
+        $attributes = Project::factory()->raw();
+
+        $this->post('/projects', $attributes)->assertRedirect('login');
+    }
+
+    #[Test]
+    public function guests_cannot_view_projects()
+    {
+
+        $this->get('/projects')->assertRedirect('login');
+    }
+
+    #[Test]
+    public function guests_cannot_view_a_single_project()
+    {
+        $project = Project::factory()->create();
+
+        $this->get($project->path())->assertRedirect('login');
+    }
+
+    #[Test]
     public function a_user_can_create_a_project()
     {
         $this->withoutExceptionHandling();
+        
+        $user = User::factory()->create();
+        $this->actingAs($user);
 
         $attributes = [
             'title' => $this->faker->sentence,
@@ -31,11 +59,13 @@ class ProjectsTest extends TestCase
     }
 
     #[Test]
-    public function a_user_can_view_a_project()
+    public function a_user_can_view_their_project()
     {
+        $this->be(User::factory()->create());
+
         $this->withoutExceptionHandling();
 
-        $project = Project::factory()->create();
+        $project = Project::factory()->create(['owner_id' => auth()->id()]);
 
         $this->get($project->path())
             ->assertSee($project->title)
@@ -43,8 +73,29 @@ class ProjectsTest extends TestCase
     }
 
     #[Test]
+    public function an_authenticated_user_cannot_view_the_projects_of_others()
+    {
+        // Create an authenticated user
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // Create a project 
+        $project = Project::factory()->create();
+
+        // Attempt to access the project path
+        $response = $this->get($project->path());
+
+        // Assert that the response status code is 403 (Forbidden)
+        $response->assertStatus(403);
+        
+    }
+
+    #[Test]
     public function a_project_requires_a_title()
     {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $attributes = Project::factory()->raw(['title' => '' ]);
 
         $this->post('/projects', $attributes)->assertSessionHasErrors('title');
@@ -53,8 +104,12 @@ class ProjectsTest extends TestCase
     #[Test]
     public function a_project_requires_a_description()
     {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
         $attributes = Project::factory()->raw(['description' => '' ]);
 
         $this->post('/projects', $attributes)->assertSessionHasErrors('description');
     }
+
 }
