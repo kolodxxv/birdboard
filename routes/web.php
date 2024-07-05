@@ -14,6 +14,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/projects', [ProjectsController::class, 'store']);
 
     Route::post('/projects/{project}/tasks', [App\Http\Controllers\ProjectTasksController::class, 'store']);
+    Route::patch('/projects/{project}/tasks/{task}', [App\Http\Controllers\ProjectTasksController::class, 'update']);
     
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
