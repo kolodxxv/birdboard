@@ -29,7 +29,8 @@ class ProjectTasksTest extends TestCase
         
         $project = Project::factory()->create();
 
-        $this->post($project->path() . '/tasks', ['body' => 'Test task'])->assertStatus(403);
+        $this->post($project->path() . '/tasks', ['body' => 'Test task'])
+            ->assertStatus(403);
 
         $this->assertDatabaseMissing('tasks', ['body' => 'Test task']);
     }
@@ -52,7 +53,7 @@ class ProjectTasksTest extends TestCase
     {
         $this->signIn();
 
-        // $project = Project::factory()->create(['owner_id' => auth()->id()]);
+        $project = Project::factory()->create(['owner_id' => auth()->id()]);
 
         $project = auth()->user()->projects()->create(Project::factory()->raw());
 
