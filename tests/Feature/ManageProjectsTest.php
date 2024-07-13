@@ -2,12 +2,13 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use App\Models\Project;
+use Facades\Tests\Setup\ProjectFactory;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 
 class ManageProjectsTest extends TestCase
 {
@@ -29,8 +30,6 @@ class ManageProjectsTest extends TestCase
     #[Test]
     public function a_user_can_create_a_project()
     {
-        $this->withoutExceptionHandling();
-
         $this->signIn();
 
         $this->get('/projects/create')->assertStatus(200);
@@ -48,8 +47,6 @@ class ManageProjectsTest extends TestCase
 
         $response->assertRedirect($project->path());
 
-        $this->assertDatabaseHas('projects', $attributes);
-
         $this->get($project->path())
             ->assertSee($attributes['title'])
             ->assertSee($attributes['description'])
@@ -59,32 +56,27 @@ class ManageProjectsTest extends TestCase
     #[Test]
     function a_user_can_update_a_project()
     {
-        $this->signIn();
+        $project = ProjectFactory::create();
 
-        $this->withoutExceptionHandling();
+        $this->actingAs($project->owner)
+            ->patch($project->path(), $attributes = ['notes' => 'Changed'])
+            ->assertRedirect($project->path());
 
-        $project = Project::factory()->create(['owner_id' => auth()->id()]);
-
-        $this->patch($project->path(), [
-            'notes' => 'Changed'
-        ])->assertRedirect($project->path());
-
-        $this->assertDatabaseHas('projects', ['notes' => 'Changed']);
+        $this->assertDatabaseHas('projects', $attributes);
     }
 
     #[Test]
     public function a_user_can_view_their_project()
     {
-        $this->signIn();
 
         $this->withoutExceptionHandling();
 
-        $project = Project::factory()->create(['owner_id' => auth()->id()]);
+        $project = ProjectFactory::create();
 
-        $this->get($project->path())
+        $this->actingAs($project->owner)
+            ->get($project->path())
             ->assertSee($project->title)
-            // ->assertSee($project->description);
-            ;
+            ->assertSee($project->description);
     }
 
     #[Test]
@@ -96,10 +88,8 @@ class ManageProjectsTest extends TestCase
         $project = Project::factory()->create();
 
         // Attempt to access the project path
-        $response = $this->get($project->path());
-
         // Assert that the response status code is 403 (Forbidden)
-        $response->assertStatus(403);
+        $this->get($project->path())->assertStatus(403);
         
     }
 
@@ -110,7 +100,7 @@ class ManageProjectsTest extends TestCase
 
         $project = Project::factory()->create();
 
-        $this->get($project->path(), [])->assertStatus(403);
+        $this->get($project->path())->assertStatus(403);
 
         
     }

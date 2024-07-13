@@ -32,7 +32,7 @@
                     @endforeach
 
                     <div class="card mb-3">
-                        <form action="{{ $project->path() . "/tasks" }}" method="POST">
+                        <form action="{{ $project->path() . '/tasks' }}" method="POST">
                             @csrf
 
                             <input placeholder="Add a new task.." class="w-full" name="body">
