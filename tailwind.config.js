@@ -16,6 +16,7 @@ export default {
       'blue': '#47cdff',
       'bg-blue': '#47cdff',
       'blue-light': '#8ae2fe',
+      'red': 'rgb(255,0,0)',
     },
     boxShadow: {
       default: '0 0 5px 0 rgba(0, 0, 0, 0.08)',
