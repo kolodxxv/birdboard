@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-   <header class="flex items-center mb-3 py-4">
+   <header class="flex items-center mb-6 py-4">
         <div class="flex justify-between items-end w-full">
             <p class="text-grey text-sm font-normal">
                 <a href="/projects">My Projects</a> 
@@ -41,6 +41,7 @@
                     </div>
                         
                 </div>
+
                 <div>
                     <h2 class="text-lg text-grey font-normal">General Notes</h2>
 
@@ -58,11 +59,19 @@
 
                         <button type="submit" class="button">Save</button>
                     </form>
+
+                    @if ($errors->any())
+                        <div class="field mt-6">
+                            @foreach ($errors->all() as $error)
+                                <li class="text-sm text-red">{{ $error }}</li>
+                            @endforeach
+                        </div>
+                    @endif
                     
                 </div>
             </div>
 
-            <div class="lg:w-1/4 px-3">
+            <div class="lg:w-1/4 px-3 lg:py-8">
                 @include('projects.card')
             </div>
         </div>
