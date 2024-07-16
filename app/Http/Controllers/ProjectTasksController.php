@@ -9,7 +9,7 @@ use App\Models\Task;
 
 class ProjectTasksController extends Controller
 {
-    public function store(Project $project, Task $task)
+    public function store(Project $project)
     {
         $this->authorize('update', $project);
         
@@ -26,20 +26,11 @@ class ProjectTasksController extends Controller
     {
         $this->authorize('update', $task->project);
 
-        request()->validate(['body' => 'required']);
+        $task->update(request()->validate(['body' => 'required']));
 
-        $task->update(['body' => request('body')]);
+        $method = request('completed') ? 'complete' : 'incomplete';
 
-        if (request()->has('completed')) {
-            $task->complete();
-        }
-
-        // $task->update([
-        //     'body' => request('body'),
-        //     'completed' => request()->has('completed')
-        // ]);
-
-        // $task->complete();
+        $task->$method();
 
         return redirect($project->path());
     }
