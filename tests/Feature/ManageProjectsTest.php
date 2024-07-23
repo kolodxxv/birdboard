@@ -31,6 +31,7 @@ class ManageProjectsTest extends TestCase
     #[Test]
     public function a_user_can_create_a_project()
     {
+        $this->withoutExceptionHandling();
         $this->signIn();
 
         $this->get('/projects/create')->assertStatus(200);
@@ -57,6 +58,7 @@ class ManageProjectsTest extends TestCase
     #[Test]
     function a_user_can_update_a_project()
     {
+        $this->withoutExceptionHandling();
         $project = ProjectFactory::create();
 
         $this->actingAs($project->owner)
